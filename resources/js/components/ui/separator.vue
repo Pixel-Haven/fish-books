@@ -1,0 +1,3 @@
+<template>
+    <div class="shrink-0 bg-border h-[1px] w-full"></div>
+</template>

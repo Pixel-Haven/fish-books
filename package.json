@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.0",
+        "@types/node": "^22",
+        "@vue/tsconfig": "^0.5.1",
+        "axios": "^1.8.2",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^1.2.0",
+        "tailwindcss": "^4.0.0",
+        "tw-animate-css": "^1.3.6",
+        "typescript": "^5.5.3",
+        "vite": "^6.2.4",
+        "vue-tsc": "^2.0.26"
+    },
+    "dependencies": {
+        "@headlessui/vue": "^1.7.22",
+        "@heroicons/vue": "^2.1.5",
+        "@inertiajs/vue3": "^1.2.0",
+        "@vitejs/plugin-vue": "^5.1.0",
+        "dayjs": "^1.11.13",
+        "tailwind-merge": "^2.5.5",
+        "tailwindcss-animate": "^1.0.7",
+        "vue": "^3.4.31",
+        "vue3-toastify": "^0.2.8",
+        "ziggy-js": "^2.5.3"
+    }
+}
