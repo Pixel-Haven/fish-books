@@ -1,7 +1,10 @@
 <?php
 
+use Inertia\Inertia;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
