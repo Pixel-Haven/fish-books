@@ -3,13 +3,14 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Traits\UsesUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, UsesUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -20,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
     ];
 
     /**
@@ -43,5 +46,53 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if user is an owner
+     */
+    public function isOwner(): bool
+    {
+        return $this->role === 'OWNER';
+    }
+
+    /**
+     * Check if user is a manager
+     */
+    public function isManager(): bool
+    {
+        return $this->role === 'MANAGER';
+    }
+
+    /**
+     * Trips created by this user
+     */
+    public function trips()
+    {
+        return $this->hasMany(Trip::class, 'created_by');
+    }
+
+    /**
+     * Expenses created by this user
+     */
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class, 'created_by');
+    }
+
+    /**
+     * Crew members created by this user
+     */
+    public function crewMembers()
+    {
+        return $this->hasMany(CrewMember::class, 'created_by');
+    }
+
+    /**
+     * Vessels created by this user
+     */
+    public function vessels()
+    {
+        return $this->hasMany(Vessel::class, 'created_by');
     }
 }

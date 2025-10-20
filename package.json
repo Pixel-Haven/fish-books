@@ -25,6 +25,7 @@
         "@inertiajs/vue3": "^1.2.0",
         "@vitejs/plugin-vue": "^5.1.0",
         "dayjs": "^1.11.13",
+        "lucide-vue-next": "^0.546.0",
         "tailwind-merge": "^2.5.5",
         "tailwindcss-animate": "^1.0.7",
         "vue": "^3.4.31",
