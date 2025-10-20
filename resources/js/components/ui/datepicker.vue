@@ -10,12 +10,14 @@
                 <CalendarDaysIcon class="h-5 w-5 text-grey-400 dark:text-grey-500" />
             </div>
         </div>
+    </div>
 
-        <!-- Datepicker Dropdown -->
+    <!-- Datepicker Dropdown (Teleported to body) -->
+    <Teleport to="body">
         <Transition :enter-active-class="transitionClasses.enterActive" :enter-from-class="transitionClasses.enterFrom"
             :enter-to-class="transitionClasses.enterTo" :leave-active-class="transitionClasses.leaveActive"
             :leave-from-class="transitionClasses.leaveFrom" :leave-to-class="transitionClasses.leaveTo">
-            <div v-if="isOpen" ref="pickerRef" :class="dropdownClasses" @click.stop>
+            <div v-if="isOpen" ref="pickerRef" :class="dropdownClasses" :style="dropdownStyles" @click.stop>
 
                 <!-- Calendar View -->
                 <div v-if="currentView === 'calendar'">
@@ -119,13 +121,14 @@
                 </div>
             </div>
         </Transition>
-    </div>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
+import { DEFAULT_DATE_FORMAT } from '@/utils/functions'
 
 interface CalendarDay {
     date: string
@@ -154,7 +157,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    format: 'YYYY-MM-DD',
+    format: DEFAULT_DATE_FORMAT, // Use centralized date format
     placeholder: 'Select date',
     disabled: false,
     locale: 'en',
@@ -181,7 +184,8 @@ const selectedDate = computed(() => {
 })
 
 const displayValue = computed(() => {
-    if (!selectedDate.value) return ''
+    if (!selectedDate.value || !selectedDate.value.isValid()) return ''
+    // Display in the user-friendly format (e.g., DD/MM/YYYY)
     return selectedDate.value.format(props.format)
 })
 
@@ -250,19 +254,32 @@ const calendarDays = computed(() => {
 const dropdownClasses = computed(() => {
     const baseClasses = [
         'datepicker-dropdown',
-        'absolute z-[9999] bg-white dark:bg-grey-900 rounded-lg',
-        'shadow-2xl',
-        'min-w-[28px] md:min-w-[250px] max-w-sm',
+        'fixed z-[99999] bg-white dark:bg-grey-900 rounded-lg',
+        'shadow-2xl border border-border',
+        'min-w-[280px] max-w-sm',
         'transform transition-all duration-200 ease-out'
     ]
 
-    if (pickerPosition.value === 'bottom') {
-        baseClasses.push('mt-1 top-full')
-    } else {
-        baseClasses.push('mb-1 bottom-full')
+    return baseClasses.join(' ')
+})
+
+const dropdownStyles = computed(() => {
+    if (!inputRef.value) return {}
+    
+    const rect = inputRef.value.getBoundingClientRect()
+    const styles: Record<string, string> = {
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        minWidth: '280px'
     }
 
-    return baseClasses.join(' ')
+    if (pickerPosition.value === 'bottom') {
+        styles.top = `${rect.bottom + 4}px`
+    } else {
+        styles.bottom = `${window.innerHeight - rect.top + 4}px`
+    }
+
+    return styles
 })
 
 const transitionClasses = computed(() => {
@@ -375,19 +392,21 @@ const selectDate = (day: CalendarDay) => {
     if (day.isDisabled) return
 
     const newDate = dayjs(day.date).tz(props.timezone)
-    const formattedDate = newDate.format(props.format)
+    // Always emit in YYYY-MM-DD format for backend/API compatibility
+    const isoDate = newDate.format('YYYY-MM-DD')
 
-    emit('update:modelValue', formattedDate)
-    emit('change', formattedDate)
+    emit('update:modelValue', isoDate)
+    emit('change', isoDate)
     closePicker()
 }
 
 const selectToday = () => {
     const today = dayjs().tz(props.timezone)
-    const formattedDate = today.format(props.format)
+    // Always emit in YYYY-MM-DD format for backend/API compatibility
+    const isoDate = today.format('YYYY-MM-DD')
 
-    emit('update:modelValue', formattedDate)
-    emit('change', formattedDate)
+    emit('update:modelValue', isoDate)
+    emit('change', isoDate)
     closePicker()
 }
 

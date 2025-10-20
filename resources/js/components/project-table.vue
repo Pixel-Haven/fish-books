@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Table from "@/components/ui/table.vue"
 import Badge from "./ui/badge.vue"
+import { formatDate } from '@/utils/functions';
 
 type ShowcaseProject = {
     projectCode: string
@@ -23,12 +24,9 @@ defineProps<{
     data?: ShowcaseProject[]
 }>()
 
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    }).toUpperCase();
+// For uppercase display in this component
+const formatDateUpper = (dateString: string) => {
+    return formatDate(dateString, 'DD MMM YYYY').toUpperCase();
 };
 
 const getStatusColor = (status: string) => {
