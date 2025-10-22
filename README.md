@@ -8,6 +8,8 @@ Pixel Starter is a minimal Laravel 12 + Inertia + Vue 3 template for quickly p
 - Tailwind CSS 4 with glassmorphism accents
 - Ziggy route helper & Vue Toastify for notifications
 
+If you need a walkthrough for preparing a local Laravel environment, read the FlyEnv guide: [Bootstrapping Laravel with FlyEnv](https://nashath.dev/blog/flyenv-laravel-launch).
+
 ## Quickstart
 
 ```bash
