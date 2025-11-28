@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('role:OWNER');
     Route::post('weekly-sheets/{weeklySheet}/finalize', [WeeklySheetController::class, 'finalize'])
         ->middleware('role:OWNER');
+    Route::post('weekly-sheets/{weeklySheet}/mark-as-paid', [WeeklySheetController::class, 'markAsPaid'])
+        ->middleware('role:OWNER');
     Route::post('weekly-sheets/{weeklySheet}/reopen', [WeeklySheetController::class, 'reopen'])
         ->middleware('role:OWNER');
 });

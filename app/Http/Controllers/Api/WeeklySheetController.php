@@ -156,6 +156,9 @@ class WeeklySheetController extends Controller
     {
         $weeklySheet->load([
             'creator',
+            'vessel',
+            'trips.vessel',
+            'trips.creator',
             'weeklyExpenses.creator',
             'weeklyPayouts.crewMember',
             'crewCredits.crewMember',
@@ -279,10 +282,7 @@ class WeeklySheetController extends Controller
      */
     public function calculate(WeeklySheet $weeklySheet)
     {
-        $calculations = $this->payoutService->calculateWeeklyPayouts(
-            $weeklySheet->from_date,
-            $weeklySheet->to_date
-        );
+        $calculations = $this->payoutService->calculate($weeklySheet);
 
         return response()->json([
             'calculations' => $calculations,
@@ -310,26 +310,22 @@ class WeeklySheetController extends Controller
 
         DB::transaction(function () use ($weeklySheet, $request) {
             // Calculate payouts
-            $calculations = $this->payoutService->calculateWeeklyPayouts(
-                $weeklySheet->from_date,
-                $weeklySheet->to_date
-            );
+            $calculations = $this->payoutService->calculate($weeklySheet);
 
             // Create payout records
             $this->payoutService->createPayoutRecords(
                 $weeklySheet,
-                $calculations,
-                $request->user()->id
+                $calculations
             );
 
             // Update totals and status
             $weeklySheet->update([
-                'total_revenue' => $calculations['total_revenue'],
-                'total_expenses' => $calculations['total_expenses'],
-                'total_crew_share' => $calculations['total_crew_share'],
-                'total_owner_share' => $calculations['total_owner_share'],
+                'total_sales' => $calculations['revenue']['total_sales'],
+                'total_expenses' => $calculations['expenses']['total'],
+                'crew_share' => $calculations['distribution']['crew_share'],
+                'owner_share' => $calculations['distribution']['owner_share'],
                 'status' => 'FINALIZED',
-                'finalized_at' => now(),
+                'processed_at' => now(),
             ]);
         });
 
@@ -340,6 +336,40 @@ class WeeklySheetController extends Controller
                 'weeklyExpenses',
                 'crewCredits.crewMember',
             ]),
+        ]);
+    }
+
+    /**
+     * Mark weekly sheet as paid
+     */
+    public function markAsPaid(Request $request, WeeklySheet $weeklySheet)
+    {
+        // Only OWNER can mark as paid
+        if ($request->user()->role !== 'OWNER') {
+            return response()->json([
+                'message' => 'Only owners can mark weekly sheets as paid.',
+            ], 403);
+        }
+
+        if ($weeklySheet->status !== 'FINALIZED') {
+            return response()->json([
+                'message' => 'Only finalized weekly sheets can be marked as paid.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($weeklySheet) {
+            $weeklySheet->update(['status' => 'PAID']);
+
+            // Mark all payouts as paid
+            $weeklySheet->weeklyPayouts()->update([
+                'is_paid' => true,
+                'paid_at' => now(),
+            ]);
+        });
+
+        return response()->json([
+            'message' => 'Weekly sheet marked as paid.',
+            'data' => $weeklySheet,
         ]);
     }
 
